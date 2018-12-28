@@ -1,0 +1,41 @@
+---
+
+ - hosts: localhost
+   remote_user: root
+   become_user: root
+   become: yes
+   gather_facts: false
+   tasks:
+     - name: check tomcat image exist or not
+       command: "docker images -q aditiu/tomcatkube:{{IMAGE_VERSION}}"
+       register: found_image_tomcat
+
+     - debug: msg="{{found_image_tomcat.stdout}}"
+
+     - name: remove tomcat docker image
+       command: "docker rmi -f aditiu/tomcatkube:{{IMAGE_VERSION}}"
+       when: found_image_tomcat.stdout != ""
+
+     - name: create tomcat docker image from docker file
+       command: "docker build -t aditiu/tomcatkube:{{IMAGE_VERSION}} tomcatImage/."
+       register: docker_res
+          
+     - name: check mysql image exist or not
+       command: "docker images -q aditiu/mysql:{{IMAGE_VERSION}}"
+       register: found_image
+
+     - debug: msg="{{found_image.stdout}}"
+
+     - name: remove docker image
+       command: "docker rmi -f aditiu/mysql:{{IMAGE_VERSION}}"
+       when: found_image.stdout != ""
+       
+     - name: create docker image from docker file
+       command: "docker build -t aditiu/mysql:{{IMAGE_VERSION}} mysqlImage/."
+       register: docker_res
+     - name: login to docker 
+       command: "docker login --username aditiu --password {{DOCKER_PASSWORD}}"
+     - name: push docker image 
+       command: "docker push aditiu/tomcatkube:{{IMAGE_VERSION}}"    
+     - name: push docker image 
+       command: "docker push aditiu/mysql:{{IMAGE_VERSION}}"       
