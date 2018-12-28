@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: tomcat1
+  labels:
+    app: tomcat1
+spec:
+  ports:
+    - port: 8080
+      nodePort: 31000
+  selector:
+    app: tomcat1
+  type: NodePort
+---
+apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+kind: Deployment
+metadata:
+  name: tomcat1
+  labels:
+    app: tomcat1
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: tomcat1
+  template:
+    metadata:
+      labels:
+        app: tomcat1
+    spec:
+      containers:
+      - name: tomcat1
+        image: aditiu/tomcatkube:3.0
+        ports: 
+         - containerPort: 8080
+
+
+
+
+
+
